@@ -72,22 +72,15 @@ func main() {
 	// Delete a ToDo by ID
 	app.Delete("/api/todos/:id", func(c *fiber.Ctx) error {
 		id := c.Params("id")
-		previousLength := len(todos)
 
-		newTodos := make([]ToDo, 0, len(todos)-1)
-		for j := range todos {
-			if fmt.Sprint(todos[j].ID) != id {
-				newTodos = append(newTodos, todos[j])
+		for i, todo := range todos {
+			if fmt.Sprint(todo.ID) == id {
+				todos = append(todos[:i], todos[i+1:]...)
+				return c.Status(200).JSON(fiber.Map{"success": true})
 			}
 		}
 
-		todos = newTodos
-		if len(todos) == previousLength {
-			return c.Status(404).JSON(fiber.Map{"error": "No ToDo associated with the given ID"})
-		} else {
-			return c.Status(200).JSON(fiber.Map{"success": "true"})
-		}
-
+		return c.Status(404).JSON(fiber.Map{"error": "ToDo not found"})
 	})
 
 	log.Fatal(app.Listen(":" + port))
