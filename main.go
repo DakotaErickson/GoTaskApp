@@ -13,11 +13,10 @@ import (
 
 	"github.com/DakotaErickson/GoTaskApp/handlers"
 	"github.com/DakotaErickson/GoTaskApp/repository"
+	"github.com/DakotaErickson/GoTaskApp/router"
 )
 
 func main() {
-	fmt.Println("Hello World!")
-
 	err := godotenv.Load(".env")
 	if err != nil {
 		log.Fatal("Error loading .env file:", err)
@@ -43,19 +42,13 @@ func main() {
 
 	collection := client.Database("golang_db").Collection("todos")
 
-	// Create a repository instance
 	todoRepo := repository.NewTodoRepository(collection)
 
-	// Create a handler instance
 	todoHandler := handlers.NewTodoHandler(*todoRepo)
 
 	app := fiber.New()
 
-	// Register routes using the handler
-	app.Get("/api/todos", todoHandler.GetAll)
-	app.Post("/api/todos", todoHandler.Create)
-	app.Patch("/api/todos/:id", todoHandler.MarkComplete)
-	app.Delete("/api/todos/:id", todoHandler.Delete)
+	router.RegisterRoutes(app, *todoHandler)
 
 	port := os.Getenv("PORT")
 	if port == "" {
